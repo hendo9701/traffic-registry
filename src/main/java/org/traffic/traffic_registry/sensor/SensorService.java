@@ -17,7 +17,7 @@ public final class SensorService extends AbstractVerticle {
 
   public static final String SENSOR_SERVICE_ADDRESS = "registry.sensor-service";
 
-  private final SensorRepository sensorRepository;
+  private SensorRepository sensorRepository;
 
   private MessageConsumer<JsonObject> consumer;
 
@@ -28,10 +28,13 @@ public final class SensorService extends AbstractVerticle {
   @Override
   public void init(Vertx vertx, Context context) {
     super.init(vertx, context);
+    if (sensorRepository == null)
+      sensorRepository =
+          new StardogRDF4JSensorRepository(context.config().getJsonObject("sensor-repository"));
   }
 
   @Override
-  public void start(Promise<Void> startPromise) {
+  public void start() {
     consumer =
         vertx
             .eventBus()
