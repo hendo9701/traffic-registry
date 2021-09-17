@@ -1,0 +1,8 @@
+@prefix traffic: <http://iot-traffic.org/> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix qu: <http://purl.oclc.org/NET/ssnx/qu/qu#> .
+@prefix iot-lite: <http://purl.oclc.org/NET/UNIS/fiware/iot-lite#> .
+
+<http://iot-traffic.org/sensors/test-1> a sosa:sensor;
+  iot-lite:hasUnit "kilometers";
+  iot-lite:hasQuantityKind "speed" .
