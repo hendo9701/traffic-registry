@@ -13,4 +13,11 @@ public class Sensor {
   public static Sensor fromJson(JsonObject json) {
     return new Sensor(json.getString("id"), json.getString("quantityKind"), json.getString("unit"));
   }
+
+  public static JsonObject asJson(Sensor sensor) {
+    return new JsonObject()
+        .put("id", sensor.id)
+        .put("quantityKind", sensor.quantityKind)
+        .put("unit", sensor.unit);
+  }
 }
