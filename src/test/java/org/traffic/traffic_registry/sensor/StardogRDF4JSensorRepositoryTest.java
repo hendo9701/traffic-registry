@@ -35,7 +35,7 @@ class StardogRDF4JSensorRepositoryTest {
   }
 
   @Test
-  @DisplayName("When a sensor is saved then the return RDF format must match")
+  @DisplayName("When a sensor is saved then the returned RDF format must match")
   void saveTest(VertxTestContext testContext) {
     val repository = new StardogRDF4JSensorRepository(config);
     val result = repository.save(sensor);
