@@ -68,7 +68,7 @@ class SensorServiceTest {
                       testContext.verify(
                           () -> {
                             Assertions.assertTrue(reply.body().containsKey("result"));
-                            Assertions.assertTrue(reply.body().getString("result").equals(__));
+                            Assertions.assertEquals(__, reply.body().getString("result"));
                             testContext.completeNow();
                           })));
 
