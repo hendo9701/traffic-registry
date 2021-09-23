@@ -25,6 +25,11 @@ public final class StreamService extends AbstractVerticle {
 
   private MessageConsumer<JsonObject> consumer;
 
+  public StreamService(StreamRepository streamRepository, PointRepository pointRepository) {
+    this.streamRepository = streamRepository;
+    this.pointRepository = pointRepository;
+  }
+
   @Override
   public void init(Vertx vertx, Context context) {
 
