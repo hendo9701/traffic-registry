@@ -55,7 +55,7 @@ public final class StardogRDF4JPointRepository extends AbstractStardogRDFReposit
           val model = QueryResults.asModel(statements);
           model.setNamespace(namespace);
           model.setNamespace(GEO);
-          Rio.write(model, writer, RDFFormat.JSONLD);
+          Rio.write(model, writer, RDFFormat.TURTLE);
         }
         return Future.succeededFuture(writer.toString());
       }
