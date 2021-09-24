@@ -2,10 +2,23 @@ package org.traffic.traffic_registry.stream;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.eclipse.rdf4j.model.util.Values;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.QueryResults;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
+import org.traffic.traffic_registry.point.PointRepository;
 
-import static java.lang.String.format;
+import java.io.StringWriter;
 
+import static org.traffic.traffic_registry.Vocabulary.*;
+import static org.traffic.traffic_registry.stream.StreamRepository.toLocalName;
+
+@Slf4j
 public final class StardogRDF4JStreamRepository extends AbstractStardogRDFRepository
     implements StreamRepository {
 
@@ -14,12 +27,47 @@ public final class StardogRDF4JStreamRepository extends AbstractStardogRDFReposi
   }
 
   @Override
-  public String toLocalName(String id) {
-    return format("/streams/%s", id);
-  }
-
-  @Override
   public Future<String> save(Stream stream) {
-    return null;
+    try (val connection = repository.getConnection()) {
+      val streamIri = Values.iri(namespace, toLocalName(stream.getId()));
+      val streamPointIri =
+          Values.iri(namespace, PointRepository.toLocalName(stream.getLocation().getId()));
+      try (val statements = connection.getStatements(streamIri, null, null)) {
+        val writer = new StringWriter();
+        // Stream does not exist
+        if (!statements.hasNext()) {
+          log.info("Saving stream: [{}]", stream);
+          connection.begin();
+          val graphIri = Values.iri(namespace, stream.getId());
+          val modelBuilder =
+              new ModelBuilder()
+                  .namedGraph(graphIri)
+                  .setNamespace(namespace)
+                  .setNamespace(IOT_STREAM)
+                  .subject(streamIri)
+                  .add(RDF.TYPE, STREAM)
+                  .add(LOCATION, streamPointIri)
+                  .add(GENERATED_BY, stream.getGeneratedBy());
+
+          if (stream.getDerivedFrom() != null)
+            modelBuilder.add(DERIVED_FROM, stream.getDerivedFrom());
+
+          val model = modelBuilder.build();
+          connection.add(model);
+          connection.commit();
+          Rio.write(model, writer, RDFFormat.TURTLE);
+        } else {
+          // Stream does exist
+          log.info("Stream: [{}] already existed", stream.getId());
+          val model = QueryResults.asModel(statements);
+          model.setNamespace(namespace);
+          model.setNamespace(IOT_STREAM);
+          Rio.write(model, writer, RDFFormat.TURTLE);
+        }
+        return Future.succeededFuture(writer.toString());
+      }
+    } catch (Exception e) {
+      return Future.failedFuture(e);
+    }
   }
 }
