@@ -33,6 +33,8 @@ public final class Vocabulary {
   public static final Namespace IOT_STREAM =
       Values.namespace("iot-stream", "http://purl.org/iot/ontology/iot-stream/");
 
+  public static final IRI STREAM = Values.iri(IOT_STREAM, "IotStream");
+
   public static final IRI STREAM_START = Values.iri(IOT_STREAM, "windowStart");
 
   public static final IRI STREAM_END = Values.iri(IOT_STREAM, "windowEnd");
