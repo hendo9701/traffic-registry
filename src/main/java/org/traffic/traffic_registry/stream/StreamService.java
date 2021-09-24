@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.traffic.traffic_registry.point.PointRepository;
@@ -15,6 +16,7 @@ import org.traffic.traffic_registry.point.StardogRDF4JPointRepository;
 import static java.lang.String.format;
 
 @Slf4j
+@NoArgsConstructor
 public final class StreamService extends AbstractVerticle {
 
   public static final String STREAM_SERVICE_ADDRESS = "registry.stream-service";
