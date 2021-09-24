@@ -44,13 +44,19 @@ public final class StardogRDF4JStreamRepository extends AbstractStardogRDFReposi
                   .namedGraph(graphIri)
                   .setNamespace(namespace)
                   .setNamespace(IOT_STREAM)
+                  .setNamespace(GEO)
                   .subject(streamIri)
                   .add(RDF.TYPE, STREAM)
                   .add(LOCATION, streamPointIri)
+                  .add(STREAM_START, stream.getStreamStart())
                   .add(GENERATED_BY, stream.getGeneratedBy());
 
           if (stream.getDerivedFrom() != null)
             modelBuilder.add(DERIVED_FROM, stream.getDerivedFrom());
+
+          if (stream.getStreamEnd() != null) {
+            modelBuilder.add(STREAM_END, stream.getStreamEnd());
+          }
 
           val model = modelBuilder.build();
           connection.add(model);
@@ -62,6 +68,7 @@ public final class StardogRDF4JStreamRepository extends AbstractStardogRDFReposi
           val model = QueryResults.asModel(statements);
           model.setNamespace(namespace);
           model.setNamespace(IOT_STREAM);
+          model.setNamespace(GEO);
           Rio.write(model, writer, RDFFormat.TURTLE);
         }
         return Future.succeededFuture(writer.toString());
