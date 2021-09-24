@@ -24,15 +24,15 @@ public abstract class AbstractStardogRDFRepository {
     val password = config.getString("password");
 
     try (val adminConnection =
-           AdminConnectionConfiguration.toServer(server).credentials(username, password).connect()) {
+        AdminConnectionConfiguration.toServer(server).credentials(username, password).connect()) {
       if (!adminConnection.list().contains(databaseName)) {
         adminConnection.newDatabase(databaseName).create();
       }
     }
 
     this.repository =
-      new StardogRepository(
-        ConnectionConfiguration.from(databaseUrl).credentials(username, password));
+        new StardogRepository(
+            ConnectionConfiguration.from(databaseUrl).credentials(username, password));
 
     if (!this.repository.isInitialized()) this.repository.initialize();
 
@@ -46,6 +46,4 @@ public abstract class AbstractStardogRDFRepository {
     this.namespace = Values.namespace(prefix, namespace);
     this.repository = repository;
   }
-
-  public abstract String toLocalName(String id);
 }

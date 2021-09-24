@@ -12,19 +12,14 @@ import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
 
 import java.io.StringWriter;
 
-import static java.lang.String.format;
 import static org.traffic.traffic_registry.Vocabulary.*;
+import static org.traffic.traffic_registry.sensor.SensorRepository.toLocalName;
 
 public final class StardogRDF4JSensorRepository extends AbstractStardogRDFRepository
     implements SensorRepository {
 
   public StardogRDF4JSensorRepository(JsonObject config) {
     super(config);
-  }
-
-  @Override
-  public String toLocalName(String id) {
-    return format("/sensors/%s", id);
   }
 
   @Override

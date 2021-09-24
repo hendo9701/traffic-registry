@@ -14,8 +14,8 @@ import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
 
 import java.io.StringWriter;
 
-import static java.lang.String.format;
 import static org.traffic.traffic_registry.Vocabulary.*;
+import static org.traffic.traffic_registry.point.PointRepository.toLocalName;
 
 @Slf4j
 public final class StardogRDF4JPointRepository extends AbstractStardogRDFRepository
@@ -84,10 +84,5 @@ public final class StardogRDF4JPointRepository extends AbstractStardogRDFReposit
     } catch (Exception e) {
       return Future.failedFuture(e);
     }
-  }
-
-  @Override
-  public String toLocalName(String id) {
-    return format("/points/%s", id);
   }
 }
