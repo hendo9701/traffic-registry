@@ -1,5 +1,6 @@
 package org.traffic.traffic_registry;
 
+import com.stardog.stark.Values;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -14,6 +15,8 @@ import io.vertx.servicediscovery.types.HttpEndpoint;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.traffic.traffic_registry.sensor.SensorRepository;
+import org.traffic.traffic_registry.stream.StreamRepository;
 
 import static org.traffic.traffic_registry.sensor.SensorService.SENSOR_SERVICE_ADDRESS;
 import static org.traffic.traffic_registry.stream.StreamService.STREAM_SERVICE_ADDRESS;
@@ -28,11 +31,14 @@ public final class RegistryVerticle extends AbstractVerticle {
 
   private Record registryRecord;
 
+  private String namespace;
+
   @Override
-  public void start(Promise<Void> startPromise) throws Exception {
+  public void start(Promise<Void> startPromise) {
 
     val port = config().getInteger("port");
     val host = config().getString("host");
+    namespace = config().getString("namespace");
     val router = buildRouter();
 
     vertx
@@ -103,7 +109,17 @@ public final class RegistryVerticle extends AbstractVerticle {
         .onSuccess(
             reply -> {
               val rdf = reply.body().getString("result");
-              routingContext.response().setStatusCode(201).end(rdf);
+              val response = routingContext.response();
+              response.setStatusCode(201);
+              response
+                  .headers()
+                  .add(
+                      "Location",
+                      Values.iri(
+                              namespace, SensorRepository.toLocalName(sensorJson.getString("id")))
+                          .toString())
+                  .add("Content-Type", "text/turtle");
+              response.end(rdf);
             })
         .onFailure(
             throwable -> routingContext.response().setStatusCode(500).end(throwable.getMessage()));
@@ -118,7 +134,17 @@ public final class RegistryVerticle extends AbstractVerticle {
         .onSuccess(
             reply -> {
               val rdf = reply.body().getString("result");
-              routingContext.response().setStatusCode(201).end(rdf);
+              val response = routingContext.response();
+              response.setStatusCode(201);
+              response
+                  .headers()
+                  .add(
+                      "Location",
+                      Values.iri(
+                              namespace, StreamRepository.toLocalName(streamJson.getString("id")))
+                          .toString())
+                  .add("Content-Type", "text/turtle");
+              response.end(rdf);
             })
         .onFailure(
             throwable -> routingContext.response().setStatusCode(500).end(throwable.getMessage()));
