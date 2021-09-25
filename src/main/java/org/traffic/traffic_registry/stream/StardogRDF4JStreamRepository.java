@@ -12,6 +12,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
 import org.traffic.traffic_registry.point.PointRepository;
+import org.traffic.traffic_registry.sensor.SensorRepository;
 
 import java.io.StringWriter;
 
@@ -32,16 +33,15 @@ public final class StardogRDF4JStreamRepository extends AbstractStardogRDFReposi
       val streamIri = Values.iri(namespace, toLocalName(stream.getId()));
       val streamPointIri =
           Values.iri(namespace, PointRepository.toLocalName(stream.getLocation().getId()));
+      val sensorIri = Values.iri(namespace, SensorRepository.toLocalName(stream.getGeneratedBy()));
       try (val statements = connection.getStatements(streamIri, null, null)) {
         val writer = new StringWriter();
         // Stream does not exist
         if (!statements.hasNext()) {
           log.info("Saving stream: [{}]", stream);
           connection.begin();
-          val graphIri = Values.iri(namespace, stream.getId());
           val modelBuilder =
               new ModelBuilder()
-                  .namedGraph(graphIri)
                   .setNamespace(namespace)
                   .setNamespace(IOT_STREAM)
                   .setNamespace(GEO)
@@ -49,7 +49,7 @@ public final class StardogRDF4JStreamRepository extends AbstractStardogRDFReposi
                   .add(RDF.TYPE, STREAM)
                   .add(LOCATION, streamPointIri)
                   .add(STREAM_START, stream.getStreamStart())
-                  .add(GENERATED_BY, stream.getGeneratedBy());
+                  .add(GENERATED_BY, sensorIri);
 
           if (stream.getDerivedFrom() != null)
             modelBuilder.add(DERIVED_FROM, stream.getDerivedFrom());
