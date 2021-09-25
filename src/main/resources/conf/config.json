@@ -6,7 +6,7 @@
       "server": "http://localhost:5820",
       "username": "admin",
       "password": "admin",
-      "namespace": "http://iot-traffic.org",
+      "namespace": "http://localhost:9987",
       "prefix": "traffic"
     }
   },
@@ -17,7 +17,7 @@
       "server": "http://localhost:5820",
       "username": "admin",
       "password": "admin",
-      "namespace": "http://iot-traffic.org",
+      "namespace": "http://localhost:9987",
       "prefix": "traffic"
     },
     "point-repository": {
@@ -26,12 +26,13 @@
       "server": "http://localhost:5820",
       "username": "admin",
       "password": "admin",
-      "namespace": "http://iot-traffic.org",
+      "namespace": "http://localhost:9987",
       "prefix": "traffic"
     }
   },
   "registry": {
     "host": "localhost",
-    "port": 9987
+    "port": 9987,
+    "namespace": "http://localhost:9987"
   }
 }
