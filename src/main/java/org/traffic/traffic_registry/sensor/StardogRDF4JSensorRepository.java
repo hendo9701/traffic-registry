@@ -26,11 +26,9 @@ public final class StardogRDF4JSensorRepository extends AbstractStardogRDFReposi
   public Future<String> save(Sensor sensor) {
 
     val iri = Values.iri(namespace, toLocalName(sensor.getId()));
-    val graphIri = Values.iri(namespace, sensor.getId());
 
     val model =
         new ModelBuilder()
-            .namedGraph(graphIri)
             .setNamespace(SOSA)
             .setNamespace(IOT_LITE)
             .setNamespace(QU)
