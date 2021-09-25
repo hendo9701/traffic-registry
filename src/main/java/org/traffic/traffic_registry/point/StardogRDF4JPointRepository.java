@@ -35,10 +35,8 @@ public final class StardogRDF4JPointRepository extends AbstractStardogRDFReposit
         if (!statements.hasNext()) {
           log.info("Saving point: [{}]", point);
           connection.begin();
-          val graphIri = Values.iri(namespace, point.getId());
           val model =
               new ModelBuilder()
-                  .namedGraph(graphIri)
                   .setNamespace(namespace)
                   .setNamespace(GEO)
                   .subject(pointIri)
