@@ -4,6 +4,7 @@ import com.stardog.stark.Values;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -89,6 +90,8 @@ public final class RegistryVerticle extends AbstractVerticle {
         .handler(bodyHandler)
         .handler(this::saveSensor);
 
+    v1Router.get("/sensors/:id").produces("text/turtle").handler(this::getSensor);
+
     v1Router
         .post("/streams")
         .consumes("application/json")
@@ -98,6 +101,29 @@ public final class RegistryVerticle extends AbstractVerticle {
 
     router.mountSubRouter("/api/v1", v1Router);
     return router;
+  }
+
+  private void getSensor(RoutingContext routingContext) {
+    val sensorId = routingContext.request().getParam("id");
+    val action = new DeliveryOptions().addHeader("action", "find");
+    vertx
+        .eventBus()
+        .<JsonObject>request(SENSOR_SERVICE_ADDRESS, new JsonObject().put("id", sensorId), action)
+        .onSuccess(
+            reply -> {
+              val rdf = reply.body().getString("result");
+              val response = routingContext.response();
+              response.setStatusCode(200);
+              response.headers().add("Content-Type", "text/turtle");
+              response.end(rdf);
+            })
+        .onFailure(
+            throwable -> {
+              val response = routingContext.response();
+              val cause = ((ReplyException) throwable);
+              response.setStatusCode(cause.failureCode());
+              response.end();
+            });
   }
 
   private void saveSensor(RoutingContext routingContext) {
