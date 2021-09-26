@@ -33,6 +33,6 @@
   "registry": {
     "host": "localhost",
     "port": 9987,
-    "namespace": "http://localhost:9987"
+    "api-namespace": "http://localhost:9987/api/v1"
   }
 }
