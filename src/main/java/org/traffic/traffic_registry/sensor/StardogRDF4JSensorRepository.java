@@ -6,9 +6,11 @@ import lombok.val;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.Values;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
+import org.traffic.traffic_registry.common.exceptions.NotFoundException;
 
 import java.io.StringWriter;
 
@@ -45,6 +47,29 @@ public final class StardogRDF4JSensorRepository extends AbstractStardogRDFReposi
       val rdf = new StringWriter();
       Rio.write(model, rdf, RDFFormat.TURTLE);
       return Future.succeededFuture(rdf.toString());
+    } catch (Exception e) {
+      return Future.failedFuture(e);
+    }
+  }
+
+  @Override
+  public Future<String> findById(String id) {
+    val iri = Values.iri(namespace, toLocalName(id));
+    try (val connection = repository.getConnection()) {
+      try (val statements = connection.getStatements(iri, null, null)) {
+        if (statements.hasNext()) {
+          val model = QueryResults.asModel(statements);
+          model.setNamespace(namespace);
+          model.setNamespace(SOSA);
+          model.setNamespace(IOT_LITE);
+          model.setNamespace(QU);
+          val writer = new StringWriter();
+          Rio.write(model, writer, RDFFormat.TURTLE);
+          return Future.succeededFuture(writer.toString());
+        } else {
+          return Future.failedFuture(new NotFoundException());
+        }
+      }
     } catch (Exception e) {
       return Future.failedFuture(e);
     }
