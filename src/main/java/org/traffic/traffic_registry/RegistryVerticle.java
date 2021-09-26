@@ -32,14 +32,14 @@ public final class RegistryVerticle extends AbstractVerticle {
 
   private Record registryRecord;
 
-  private String namespace;
+  private String apiNamespace;
 
   @Override
   public void start(Promise<Void> startPromise) {
 
     val port = config().getInteger("port");
     val host = config().getString("host");
-    namespace = config().getString("namespace");
+    apiNamespace = config().getString("api-namespace");
     val router = buildRouter();
 
     vertx
@@ -142,7 +142,8 @@ public final class RegistryVerticle extends AbstractVerticle {
                   .add(
                       "Location",
                       Values.iri(
-                              namespace, SensorRepository.toLocalName(sensorJson.getString("id")))
+                              apiNamespace,
+                              SensorRepository.toLocalName(sensorJson.getString("id")))
                           .toString())
                   .add("Content-Type", "text/turtle");
               response.end(rdf);
@@ -167,7 +168,8 @@ public final class RegistryVerticle extends AbstractVerticle {
                   .add(
                       "Location",
                       Values.iri(
-                              namespace, StreamRepository.toLocalName(streamJson.getString("id")))
+                              apiNamespace,
+                              StreamRepository.toLocalName(streamJson.getString("id")))
                           .toString())
                   .add("Content-Type", "text/turtle");
               response.end(rdf);
