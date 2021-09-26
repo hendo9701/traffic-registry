@@ -8,6 +8,8 @@ public interface SensorRepository {
 
   Future<String> save(Sensor sensor);
 
+  Future<String> findById(String id);
+
   static String toLocalName(String id) {
     return format("/sensors/%s", id);
   }

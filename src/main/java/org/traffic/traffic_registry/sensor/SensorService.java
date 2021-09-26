@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.traffic.traffic_registry.common.exceptions.NotFoundException;
 
 import static java.lang.String.format;
 
@@ -47,11 +48,35 @@ public final class SensorService extends AbstractVerticle {
                     case "save":
                       save(message);
                       break;
+                    case "find":
+                      find(message);
+                      break;
                     default:
                       message.fail(
                           400, format("Unknown action: [%s]", message.headers().get("action")));
                   }
                 });
+  }
+
+  private void find(Message<JsonObject> message) {
+    val id = message.body().getString("id");
+    sensorRepository
+        .findById(id)
+        .onSuccess(
+            sensorGraph -> {
+              log.info("Found sensor with id: {}", id);
+              message.reply(new JsonObject().put("result", sensorGraph));
+            })
+        .onFailure(
+            throwable -> {
+              if (throwable instanceof NotFoundException) {
+                log.debug("Sensor not found: {}", id);
+                message.fail(404, "404");
+              } else {
+                log.debug("Unable to find sensor by id: {}", throwable.toString());
+                message.fail(500, throwable.getMessage());
+              }
+            });
   }
 
   private void save(Message<JsonObject> message) {
