@@ -149,7 +149,10 @@ public final class RegistryVerticle extends AbstractVerticle {
               response.end(rdf);
             })
         .onFailure(
-            throwable -> routingContext.response().setStatusCode(500).end(throwable.getMessage()));
+            throwable -> {
+              val cause = ((ReplyException) throwable);
+              routingContext.response().setStatusCode(cause.failureCode()).end(cause.getMessage());
+            });
   }
 
   private void saveStream(RoutingContext routingContext) {
@@ -175,6 +178,9 @@ public final class RegistryVerticle extends AbstractVerticle {
               response.end(rdf);
             })
         .onFailure(
-            throwable -> routingContext.response().setStatusCode(500).end(throwable.getMessage()));
+            throwable -> {
+              val cause = ((ReplyException) throwable);
+              routingContext.response().setStatusCode(cause.failureCode()).end(cause.getMessage());
+            });
   }
 }
