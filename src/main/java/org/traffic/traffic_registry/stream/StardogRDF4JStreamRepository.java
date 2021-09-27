@@ -11,6 +11,7 @@ import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
+import org.traffic.traffic_registry.common.exceptions.ConflictException;
 import org.traffic.traffic_registry.common.exceptions.NotFoundException;
 import org.traffic.traffic_registry.point.PointRepository;
 import org.traffic.traffic_registry.sensor.SensorRepository;
@@ -64,13 +65,8 @@ public final class StardogRDF4JStreamRepository extends AbstractStardogRDFReposi
           connection.commit();
           Rio.write(model, writer, RDFFormat.TURTLE);
         } else {
-          // Stream does exist
-          log.info("Stream: [{}] already existed", stream.getId());
-          val model = QueryResults.asModel(statements);
-          model.setNamespace(namespace);
-          model.setNamespace(IOT_STREAM);
-          model.setNamespace(GEO);
-          Rio.write(model, writer, RDFFormat.TURTLE);
+          log.debug("Stream: [{}] already existed", stream.getId());
+          return Future.failedFuture(new ConflictException());
         }
         return Future.succeededFuture(writer.toString());
       }

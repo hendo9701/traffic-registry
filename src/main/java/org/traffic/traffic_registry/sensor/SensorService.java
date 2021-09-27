@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.traffic.traffic_registry.common.exceptions.ConflictException;
 import org.traffic.traffic_registry.common.exceptions.NotFoundException;
 
 import static java.lang.String.format;
@@ -90,8 +91,9 @@ public final class SensorService extends AbstractVerticle {
             })
         .onFailure(
             throwable -> {
-              throwable.printStackTrace();
-              message.fail(500, format("Unable to save sensor: [%s]", sensor.getId()));
+              if (throwable instanceof ConflictException)
+                message.fail(409, "Sensor already existed");
+              else message.fail(500, format("Unable to save sensor: [%s]", sensor.getId()));
             });
   }
 

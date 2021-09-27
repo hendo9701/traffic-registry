@@ -1,15 +1,13 @@
 package org.traffic.traffic_registry.stream;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Context;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.traffic.traffic_registry.common.exceptions.ConflictException;
 import org.traffic.traffic_registry.common.exceptions.NotFoundException;
 import org.traffic.traffic_registry.point.PointRepository;
 import org.traffic.traffic_registry.point.StardogRDF4JPointRepository;
@@ -90,7 +88,8 @@ public final class StreamService extends AbstractVerticle {
     val stream = Stream.fromJson(message.body());
     pointRepository
         .save(stream.getLocation())
-        .compose(rdf -> streamRepository.save(stream))
+        .recover(__ -> Future.succeededFuture())
+        .compose(__ -> streamRepository.save(stream))
         .onSuccess(
             streamGraph -> {
               log.info("Successfully inserted stream: {}", streamGraph);
@@ -98,8 +97,9 @@ public final class StreamService extends AbstractVerticle {
             })
         .onFailure(
             throwable -> {
-              throwable.printStackTrace();
-              message.fail(500, format("Unable to save stream: [%s]", stream.getId()));
+              if (throwable instanceof ConflictException)
+                message.fail(409, "Stream already existed");
+              else message.fail(500, format("Unable to save stream: [%s]", stream.getId()));
             });
   }
 

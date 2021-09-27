@@ -11,6 +11,7 @@ import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
+import org.traffic.traffic_registry.common.exceptions.ConflictException;
 
 import java.io.StringWriter;
 
@@ -50,10 +51,7 @@ public final class StardogRDF4JPointRepository extends AbstractStardogRDFReposit
         } else {
           // Point does exist
           log.info("Point: [{}] already existed", point.getId());
-          val model = QueryResults.asModel(statements);
-          model.setNamespace(namespace);
-          model.setNamespace(GEO);
-          Rio.write(model, writer, RDFFormat.TURTLE);
+          return Future.failedFuture(new ConflictException());
         }
         return Future.succeededFuture(writer.toString());
       }

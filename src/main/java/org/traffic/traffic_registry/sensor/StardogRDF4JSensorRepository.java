@@ -2,6 +2,7 @@ package org.traffic.traffic_registry.sensor;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.Values;
@@ -10,6 +11,7 @@ import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
+import org.traffic.traffic_registry.common.exceptions.ConflictException;
 import org.traffic.traffic_registry.common.exceptions.NotFoundException;
 
 import java.io.StringWriter;
@@ -17,6 +19,7 @@ import java.io.StringWriter;
 import static org.traffic.traffic_registry.Vocabulary.*;
 import static org.traffic.traffic_registry.sensor.SensorRepository.toLocalName;
 
+@Slf4j
 public final class StardogRDF4JSensorRepository extends AbstractStardogRDFRepository
     implements SensorRepository {
 
@@ -29,24 +32,31 @@ public final class StardogRDF4JSensorRepository extends AbstractStardogRDFReposi
 
     val iri = Values.iri(namespace, toLocalName(sensor.getId()));
 
-    val model =
-        new ModelBuilder()
-            .setNamespace(SOSA)
-            .setNamespace(IOT_LITE)
-            .setNamespace(QU)
-            .subject(iri)
-            .add(RDF.TYPE, SENSOR)
-            .add(HAS_QUANTITY_KIND, sensor.getQuantityKind())
-            .add(HAS_UNIT, sensor.getUnit())
-            .build();
-
     try (val connection = repository.getConnection()) {
-      connection.begin();
-      connection.add(model);
-      connection.commit();
-      val rdf = new StringWriter();
-      Rio.write(model, rdf, RDFFormat.TURTLE);
-      return Future.succeededFuture(rdf.toString());
+      try (val statements = connection.getStatements(iri, null, null)) {
+        if (statements.hasNext()) {
+          log.debug("Sensor: [{}] already existed", sensor.getId());
+          return Future.failedFuture(new ConflictException());
+        } else {
+          log.debug("Saving new sensor");
+          val model =
+              new ModelBuilder()
+                  .setNamespace(SOSA)
+                  .setNamespace(IOT_LITE)
+                  .setNamespace(QU)
+                  .subject(iri)
+                  .add(RDF.TYPE, SENSOR)
+                  .add(HAS_QUANTITY_KIND, sensor.getQuantityKind())
+                  .add(HAS_UNIT, sensor.getUnit())
+                  .build();
+          connection.begin();
+          connection.add(model);
+          connection.commit();
+          val rdf = new StringWriter();
+          Rio.write(model, rdf, RDFFormat.TURTLE);
+          return Future.succeededFuture(rdf.toString());
+        }
+      }
     } catch (Exception e) {
       return Future.failedFuture(e);
     }
