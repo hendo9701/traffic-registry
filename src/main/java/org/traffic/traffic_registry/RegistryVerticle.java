@@ -99,8 +99,33 @@ public final class RegistryVerticle extends AbstractVerticle {
         .handler(bodyHandler)
         .handler(this::saveStream);
 
+    v1Router.get("/streams/:id").produces("text/turtle").handler(this::getStream);
+
     router.mountSubRouter("/api/v1", v1Router);
     return router;
+  }
+
+  private void getStream(RoutingContext routingContext) {
+    val streamId = routingContext.request().getParam("id");
+    val action = new DeliveryOptions().addHeader("action", "find");
+    vertx
+      .eventBus()
+      .<JsonObject>request(STREAM_SERVICE_ADDRESS, new JsonObject().put("id", streamId), action)
+      .onSuccess(
+        reply -> {
+          val rdf = reply.body().getString("result");
+          val response = routingContext.response();
+          response.setStatusCode(200);
+          response.headers().add("Content-Type", "text/turtle");
+          response.end(rdf);
+        })
+      .onFailure(
+        throwable -> {
+          val response = routingContext.response();
+          val cause = ((ReplyException) throwable);
+          response.setStatusCode(cause.failureCode());
+          response.end();
+        });
   }
 
   private void getSensor(RoutingContext routingContext) {
