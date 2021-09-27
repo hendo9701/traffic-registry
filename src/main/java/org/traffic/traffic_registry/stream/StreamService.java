@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.traffic.traffic_registry.common.exceptions.NotFoundException;
 import org.traffic.traffic_registry.point.PointRepository;
 import org.traffic.traffic_registry.point.StardogRDF4JPointRepository;
 
@@ -58,11 +59,31 @@ public final class StreamService extends AbstractVerticle {
                     case "save":
                       save(message);
                       break;
+                    case "find":
+                      find(message);
+                      break;
                     default:
                       message.fail(
                           400, format("Unknown action: [%s]", message.headers().get("action")));
                   }
                 });
+  }
+
+  private void find(Message<JsonObject> message) {
+    val id = message.body().getString("id");
+    streamRepository
+        .findById(id)
+        .onSuccess(
+            rdf -> {
+              log.info("Found stream with id: {}", id);
+              message.reply(new JsonObject().put("result", rdf));
+            })
+        .onFailure(
+            throwable -> {
+              if (throwable instanceof NotFoundException)
+                message.fail(404, String.format("Stream not found with id: %s", id));
+              else message.fail(500, throwable.getMessage());
+            });
   }
 
   private void save(Message<JsonObject> message) {

@@ -11,6 +11,7 @@ import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
+import org.traffic.traffic_registry.common.exceptions.NotFoundException;
 import org.traffic.traffic_registry.point.PointRepository;
 import org.traffic.traffic_registry.sensor.SensorRepository;
 
@@ -75,6 +76,26 @@ public final class StardogRDF4JStreamRepository extends AbstractStardogRDFReposi
       }
     } catch (Exception e) {
       return Future.failedFuture(e);
+    }
+  }
+
+  @Override
+  public Future<String> findById(String id) {
+    try (val connection = repository.getConnection()) {
+      val iri = Values.iri(namespace, toLocalName(id));
+      try (val statements = connection.getStatements(iri, null, null)) {
+        if (statements.hasNext()) {
+          val model = QueryResults.asModel(statements);
+          model.setNamespace(namespace);
+          model.setNamespace(IOT_STREAM);
+          model.setNamespace(GEO);
+          val rdfWriter = new StringWriter();
+          Rio.write(model, rdfWriter, RDFFormat.TURTLE);
+          return Future.succeededFuture(rdfWriter.toString());
+        } else {
+          return Future.failedFuture(new NotFoundException());
+        }
+      }
     }
   }
 }
