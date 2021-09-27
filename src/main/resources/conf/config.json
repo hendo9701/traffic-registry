@@ -6,7 +6,7 @@
       "server": "http://localhost:5820",
       "username": "admin",
       "password": "admin",
-      "namespace": "http://localhost:9987",
+      "namespace": "http://localhost:9987/api/v1",
       "prefix": "traffic"
     }
   },
@@ -17,7 +17,7 @@
       "server": "http://localhost:5820",
       "username": "admin",
       "password": "admin",
-      "namespace": "http://localhost:9987",
+      "namespace": "http://localhost:9987/api/v1",
       "prefix": "traffic"
     },
     "point-repository": {
@@ -26,7 +26,7 @@
       "server": "http://localhost:5820",
       "username": "admin",
       "password": "admin",
-      "namespace": "http://localhost:9987",
+      "namespace": "http://localhost:9987/api/v1",
       "prefix": "traffic"
     }
   },

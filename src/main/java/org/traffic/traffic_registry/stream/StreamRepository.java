@@ -11,6 +11,6 @@ public interface StreamRepository {
   Future<String> findById(String id);
 
   static String toLocalName(String id) {
-    return format("/points/%s", id);
+    return format("/streams/%s", id);
   }
 }
