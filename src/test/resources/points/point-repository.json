@@ -4,6 +4,6 @@
   "server": "http://localhost:5820",
   "username": "admin",
   "password": "admin",
-  "namespace": "http://iot-traffic.org",
+  "namespace": "http://localhost:9987/api/v1",
   "prefix": "traffic"
 }

@@ -1,10 +1,10 @@
-@prefix traffic: <http://iot-traffic.org> .
+@prefix traffic: <http://localhost:9987/api/v1> .
 @prefix iot-stream: <http://purl.org/iot/ontology/iot-stream/> .
 @prefix wgs84_pos: <https://www.w3.org/2003/01/geo/wgs84_pos/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<http://iot-traffic.org/points/stream-1> a iot-stream:IotStream;
-  wgs84_pos:location <http://iot-traffic.org/points/point1>;
+<http://localhost:9987/api/v1/streams/stream-1> a iot-stream:IotStream;
+  wgs84_pos:location <http://localhost:9987/api/v1/points/point1>;
   iot-stream:windowStart "2021-09-05T01:25:00.0"^^xsd:dateTime;
-  iot-stream:generatedBy "sensor-1";
+  iot-stream:generatedBy <http://localhost:9987/api/v1/sensors/sensor-1>;
   iot-stream:derivedFrom "stream-0" .
