@@ -10,6 +10,8 @@ public interface StreamRepository {
 
   Future<String> findById(String id);
 
+  Future<String> findAll();
+
   static String toLocalName(String id) {
     return format("/streams/%s", id);
   }
