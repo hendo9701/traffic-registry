@@ -66,6 +66,11 @@
       <version>3.7.2</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.rdf4j</groupId>
+      <artifactId>rdf4j-rio-jsonld</artifactId>
+      <version>3.7.2</version>
+    </dependency>
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
     </dependency>

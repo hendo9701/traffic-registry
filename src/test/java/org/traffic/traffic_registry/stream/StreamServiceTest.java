@@ -27,7 +27,7 @@ class StreamServiceTest {
 
   private static Stream stream;
 
-  private static final String __ = "";
+  private static final String __ = "Foo";
 
   @BeforeAll
   static void prepare(Vertx vertx) {
@@ -41,7 +41,7 @@ class StreamServiceTest {
     @BeforeEach
     void deploy(Vertx vertx, VertxTestContext testContext) {
       val streamRepositoryMock = mock(StreamRepository.class);
-      when(streamRepositoryMock.save(stream)).thenReturn(Future.succeededFuture(__));
+      when(streamRepositoryMock.save(any())).thenReturn(Future.succeededFuture(__));
 
       val pointRepositoryMock = mock(PointRepository.class);
       when(pointRepositoryMock.save(any())).thenReturn(Future.succeededFuture(__));

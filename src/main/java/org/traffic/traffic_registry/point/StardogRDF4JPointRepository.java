@@ -11,7 +11,6 @@ import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.traffic.traffic_registry.common.AbstractStardogRDFRepository;
-import org.traffic.traffic_registry.common.exceptions.ConflictException;
 
 import java.io.StringWriter;
 
@@ -30,31 +29,23 @@ public final class StardogRDF4JPointRepository extends AbstractStardogRDFReposit
   public Future<String> save(Point point) {
     try (val connection = repository.getConnection()) {
       val pointIri = Values.iri(namespace, toLocalName(point.getId()));
-      try (val statements = connection.getStatements(pointIri, null, null)) {
-        val writer = new StringWriter();
-        // Point does not exist
-        if (!statements.hasNext()) {
-          log.info("Saving point: [{}]", point);
-          connection.begin();
-          val model =
-              new ModelBuilder()
-                  .setNamespace(namespace)
-                  .setNamespace(GEO)
-                  .subject(pointIri)
-                  .add(RDF.TYPE, POINT)
-                  .add(LATITUDE, point.getLatitude())
-                  .add(LONGITUDE, point.getLongitude())
-                  .build();
-          connection.add(model);
-          connection.commit();
-          Rio.write(model, writer, RDFFormat.TURTLE);
-        } else {
-          // Point does exist
-          log.info("Point: [{}] already existed", point.getId());
-          return Future.failedFuture(new ConflictException());
-        }
-        return Future.succeededFuture(writer.toString());
-      }
+      val writer = new StringWriter();
+      log.info("Saving point: [{}]", point);
+      connection.begin();
+      val model =
+          new ModelBuilder()
+              .setNamespace(namespace)
+              .setNamespace(GEO)
+              .subject(pointIri)
+              .add(RDF.TYPE, POINT)
+              .add(LATITUDE, point.getLatitude())
+              .add(LONGITUDE, point.getLongitude())
+              .build();
+      connection.add(model);
+      connection.commit();
+      Rio.write(model, writer, RDFFormat.TURTLE);
+      return Future.succeededFuture(writer.toString());
+
     } catch (Exception e) {
       return Future.failedFuture(e);
     }

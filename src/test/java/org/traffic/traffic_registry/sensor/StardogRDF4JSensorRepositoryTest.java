@@ -1,5 +1,6 @@
 package org.traffic.traffic_registry.sensor;
 
+import com.complexible.stardog.api.admin.AdminConnectionConfiguration;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
@@ -32,6 +33,17 @@ class StardogRDF4JSensorRepositoryTest {
     sensor =
         Sensor.fromJson(new JsonObject(vertx.fileSystem().readFileBlocking("sensors/sensor.json")));
     rdfSensor = vertx.fileSystem().readFileBlocking("sensors/sensor.ttl").toString();
+    val databaseName = config.getString("database-name");
+    val server = config.getString("server");
+    val username = config.getString("username");
+    val password = config.getString("password");
+
+    try (val adminConnection =
+        AdminConnectionConfiguration.toServer(server).credentials(username, password).connect()) {
+      if (adminConnection.list().contains(databaseName)) {
+        adminConnection.drop(databaseName);
+      }
+    }
   }
 
   @Test

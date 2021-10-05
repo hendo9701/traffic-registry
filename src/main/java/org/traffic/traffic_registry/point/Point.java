@@ -3,6 +3,8 @@ package org.traffic.traffic_registry.point;
 import io.vertx.core.json.JsonObject;
 import lombok.Value;
 
+import java.util.UUID;
+
 @Value
 public class Point {
 
@@ -18,6 +20,7 @@ public class Point {
   }
 
   public static Point fromJson(JsonObject json) {
-    return new Point(json.getString("id"), json.getDouble("latitude"), json.getDouble("longitude"));
+    return new Point(
+        UUID.randomUUID().toString(), json.getDouble("latitude"), json.getDouble("longitude"));
   }
 }
