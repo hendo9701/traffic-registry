@@ -90,6 +90,7 @@ public final class RegistryVerticle extends AbstractVerticle {
         .handler(bodyHandler)
         .handler(this::saveSensor);
 
+    v1Router.get("/sensors").produces("text/turtle").handler(this::getSensors);
     v1Router.get("/sensors/:id").produces("text/turtle").handler(this::getSensor);
 
     v1Router
@@ -100,9 +101,32 @@ public final class RegistryVerticle extends AbstractVerticle {
         .handler(this::saveStream);
 
     v1Router.get("/streams/:id").produces("text/turtle").handler(this::getStream);
+    v1Router.get("/streams/").produces("text/turtle").handler(this::getStreams);
 
     router.mountSubRouter("/api/v1", v1Router);
     return router;
+  }
+
+  private void getStreams(RoutingContext routingContext) {
+    val action = new DeliveryOptions().addHeader("action", "findAll");
+    vertx
+        .eventBus()
+        .<JsonObject>request(STREAM_SERVICE_ADDRESS, new JsonObject(), action)
+        .onSuccess(
+            reply -> {
+              val rdf = reply.body().getString("result");
+              val response = routingContext.response();
+              response.setStatusCode(200);
+              response.headers().add("Content-Type", "text/turtle");
+              response.end(rdf);
+            })
+        .onFailure(
+            throwable -> {
+              val response = routingContext.response();
+              val cause = ((ReplyException) throwable);
+              response.setStatusCode(cause.failureCode());
+              response.end();
+            });
   }
 
   private void getStream(RoutingContext routingContext) {
@@ -134,6 +158,28 @@ public final class RegistryVerticle extends AbstractVerticle {
     vertx
         .eventBus()
         .<JsonObject>request(SENSOR_SERVICE_ADDRESS, new JsonObject().put("id", sensorId), action)
+        .onSuccess(
+            reply -> {
+              val rdf = reply.body().getString("result");
+              val response = routingContext.response();
+              response.setStatusCode(200);
+              response.headers().add("Content-Type", "text/turtle");
+              response.end(rdf);
+            })
+        .onFailure(
+            throwable -> {
+              val response = routingContext.response();
+              val cause = ((ReplyException) throwable);
+              response.setStatusCode(cause.failureCode());
+              response.end();
+            });
+  }
+
+  private void getSensors(RoutingContext routingContext) {
+    val action = new DeliveryOptions().addHeader("action", "findAll");
+    vertx
+        .eventBus()
+        .<JsonObject>request(SENSOR_SERVICE_ADDRESS, new JsonObject(), action)
         .onSuccess(
             reply -> {
               val rdf = reply.body().getString("result");

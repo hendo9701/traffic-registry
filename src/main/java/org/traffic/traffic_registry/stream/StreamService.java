@@ -60,11 +60,24 @@ public final class StreamService extends AbstractVerticle {
                     case "find":
                       find(message);
                       break;
+                    case "findAll":
+                      findAll(message);
+                      break;
                     default:
                       message.fail(
                           400, format("Unknown action: [%s]", message.headers().get("action")));
                   }
                 });
+  }
+
+  private void findAll(Message<JsonObject> message) {
+    streamRepository
+        .findAll()
+        .onSuccess(
+            streamGraph -> {
+              message.reply(new JsonObject().put("result", streamGraph));
+            })
+        .onFailure(throwable -> message.fail(500, throwable.toString()));
   }
 
   private void find(Message<JsonObject> message) {

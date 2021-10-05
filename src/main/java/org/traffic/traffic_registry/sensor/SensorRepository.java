@@ -10,6 +10,8 @@ public interface SensorRepository {
 
   Future<String> findById(String id);
 
+  Future<String> findAll();
+
   static String toLocalName(String id) {
     return format("/sensors/%s", id);
   }
