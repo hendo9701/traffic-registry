@@ -17,7 +17,7 @@ public final class MainVerticle extends AbstractVerticle {
   private JsonObject config;
 
   public static void main(String[] args) {
-    Launcher.executeCommand("run", MainVerticle.class.getName());
+    Launcher.executeCommand("run", MainVerticle.class.getName(), "-cluster");
   }
 
   @Override
