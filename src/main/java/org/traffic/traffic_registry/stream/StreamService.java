@@ -103,13 +103,10 @@ public final class StreamService extends AbstractVerticle {
         .save(stream.getLocation())
         .recover(__ -> Future.succeededFuture())
         .compose(
-            __ -> {
-              log.debug("here");
-              return streamRepository.save(stream);
-            })
+            __ -> streamRepository.save(stream))
         .onSuccess(
             streamGraph -> {
-              log.info("Successfully inserted stream: {}", streamGraph);
+              log.info("Successfully inserted stream: {}", stream.getId());
               message.reply(new JsonObject().put("result", streamGraph));
             })
         .onFailure(
